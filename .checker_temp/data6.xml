@@ -12,8 +12,8 @@
   <line>Command: /mnt/c/Users/filip/Desktop/Docs/Facultate/Teme/PA/TemaGameOfLife/a.out /mnt/c/Users/filip/Desktop/Docs/Facultate/Teme/PA/TemaGameOfLife/in/data6.in /mnt/c/Users/filip/Desktop/Docs/Facultate/Teme/PA/TemaGameOfLife/out/data6.out</line>
 </preamble>
 
-<pid>5119</pid>
-<ppid>5072</ppid>
+<pid>5864</pid>
+<ppid>5822</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -38,7 +38,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.172 </time>
+  <time>00:00:00:01.100 </time>
 </status>
 
 <errorcounts>

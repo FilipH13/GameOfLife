@@ -1,4 +1,4 @@
 build:
-	gcc program.c
+	gcc genlib.h genlib.c program.c
 clean:
 	rm -f a.out

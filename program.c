@@ -1,11 +1,20 @@
 #include "genlib.h"
 
+
+void push (StackNode **top, Node* lista) {
+    StackNode *newNode = (StackNode*)malloc(sizeof(StackNode));
+    newNode->capLista = lista;
+    newNode->next =* top;
+    *top = newNode;
+}
+
 int main (int argc, const char* argv[]) {
-    
+
     //declarare variabile
     FILE *fin, *fout;
     int nr_fisier, nr_linii, nr_coloane, nr_generatii, i;
     char **generatie;
+    StackNode* stackTop = NULL;
 
     //verificare deschidere fisiere
     if ((fin = fopen(argv[1], "r")) == NULL) {
@@ -42,8 +51,14 @@ int main (int argc, const char* argv[]) {
 
     //Generare generatie urmatoare si printare
     for (i = 0; i < nr_generatii; i++) {
-        gen_urmatoare(generatie, nr_linii, nr_coloane);
+        Node *capLista = NULL;
+        gen_urmatoare(generatie, nr_linii, nr_coloane, &capLista);
         printare_matrice(fout, generatie, nr_linii, nr_coloane);
+        // if (capLista != NULL) {
+        //     // printLista(fout, capLista);
+        //     // fprintf(fout,"\n");
+        //     // push(&stackTop, capLista);
+        // }
     }
 
     eliberare_generatie(&generatie, nr_linii, nr_coloane);

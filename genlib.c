@@ -1,6 +1,6 @@
 #include "genlib.h"
 
-void citire_matrice(FILE *fin, char **gen, int n, int m) {
+void citire_matrice(FILE *fin, Data **gen, int n, int m) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             fscanf(fin, " %c", &gen[i][j]);
@@ -8,7 +8,7 @@ void citire_matrice(FILE *fin, char **gen, int n, int m) {
     }
 }
 
-void printare_matrice(FILE *fout, char **gen, int n, int m) {
+void printare_matrice(FILE *fout, Data **gen, int n, int m) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             fprintf(fout, "%c", gen[i][j]);
@@ -18,7 +18,7 @@ void printare_matrice(FILE *fout, char **gen, int n, int m) {
     fprintf(fout, "\n");
 }
 
-void eliberare_generatie(char ***a, int n, int m) {
+void eliberare_generatie(Data ***a, int n, int m) {
     for (int i = 0; i < n; i++) {
         free ((*(a))[i]);
     }
@@ -32,7 +32,7 @@ void eliberare_matrice(int ***a, int n, int m) {
     free (*(a));
 }
 
-int calcul_vecini_vii(char **gen, int ln, int cl, int n, int m) {
+int calcul_vecini_vii(Data **gen, int ln, int cl, int n, int m) {
     int nr = 0;
     if (ln > 0 && cl > 0 && ln < n - 1 && cl < m - 1 ) { //celula centru 
         if (gen[ln][cl - 1] == CELULA_VIE) { //vecin stanga !
@@ -171,7 +171,38 @@ int calcul_vecini_vii(char **gen, int ln, int cl, int n, int m) {
     return nr;
 }
 
-void gen_urmatoare(char **gen, int n, int m) {
+void addAtBeginning(Node** head, int l, int c) {
+    Node *newNode = (Node*)malloc(sizeof(Node));
+	newNode->linie = l;
+    newNode->coloana = c;
+	newNode->next = *head;
+	*head = newNode;
+}
+
+void addAtEnd(Node** head, int l, int c) {
+    Node *aux = *head;
+    Node *newNode = (Node*)malloc(sizeof(Node));
+	newNode->linie = l;
+    newNode->coloana = c;
+
+    if (*head == NULL) 
+        addAtBeginning(&*head, l, c);
+    else {
+        while (aux->next != NULL) 
+            aux = aux->next;
+        aux->next = newNode;
+        newNode->next = NULL;
+    }
+}
+
+void printLista(FILE *fout, Node *head) { // lista nu se modifica
+    while (head != NULL) {
+        fprintf(fout,"%d %d", head->linie, head->coloana);
+        head = head->next;
+    }
+}
+
+void gen_urmatoare(Data **gen, int n, int m, Node **head) {
     //Definire si alocare memore matrice nr_vecini_vii
     int **vecini, i, j;
     if ((vecini = (int**)malloc(n*sizeof(int*))) == NULL) {
@@ -197,11 +228,13 @@ void gen_urmatoare(char **gen, int n, int m) {
                 case CELULA_VIE:
                     if (vecini[i][j] < 2 || vecini[i][j] > 3) {
                         gen[i][j] = CELULA_MOARTA;
+                        addAtEnd(head, i, j);
                     }
                     break;
                 default:
                     if (vecini[i][j] == 3) {
                         gen[i][j] = CELULA_VIE;
+                        addAtEnd(head, i, j);
                     }
                     break;
             }

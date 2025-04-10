@@ -171,38 +171,7 @@ int calcul_vecini_vii(Data **gen, int ln, int cl, int n, int m) {
     return nr;
 }
 
-void addAtBeginning(Node** head, int l, int c) {
-    Node *newNode = (Node*)malloc(sizeof(Node));
-	newNode->linie = l;
-    newNode->coloana = c;
-	newNode->next = *head;
-	*head = newNode;
-}
-
-void addAtEnd(Node** head, int l, int c) {
-    Node *aux = *head;
-    Node *newNode = (Node*)malloc(sizeof(Node));
-	newNode->linie = l;
-    newNode->coloana = c;
-
-    if (*head == NULL) 
-        addAtBeginning(&*head, l, c);
-    else {
-        while (aux->next != NULL) 
-            aux = aux->next;
-        aux->next = newNode;
-        newNode->next = NULL;
-    }
-}
-
-void printLista(FILE *fout, Node *head) { // lista nu se modifica
-    while (head != NULL) {
-        fprintf(fout,"%d %d", head->linie, head->coloana);
-        head = head->next;
-    }
-}
-
-void gen_urmatoare(Data **gen, int n, int m, Node **head) {
+void gen_urmatoare(Data **gen, int n, int m) {
     //Definire si alocare memore matrice nr_vecini_vii
     int **vecini, i, j;
     if ((vecini = (int**)malloc(n*sizeof(int*))) == NULL) {
@@ -228,13 +197,11 @@ void gen_urmatoare(Data **gen, int n, int m, Node **head) {
                 case CELULA_VIE:
                     if (vecini[i][j] < 2 || vecini[i][j] > 3) {
                         gen[i][j] = CELULA_MOARTA;
-                        addAtEnd(head, i, j);
                     }
                     break;
                 default:
                     if (vecini[i][j] == 3) {
                         gen[i][j] = CELULA_VIE;
-                        addAtEnd(head, i, j);
                     }
                     break;
             }

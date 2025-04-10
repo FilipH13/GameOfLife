@@ -15,16 +15,24 @@ struct Elem {
 
 typedef struct Elem ListNode;
 
+struct sd {
+    int nr;
+    ListNode* listhead;
+};
+
+typedef struct sd StackData;
+
 struct StackList {
-    ListNode* val;
+    StackData val;
     struct StackList* next;
 };
 
 typedef struct StackList StackNode;
 
-void addAtBeginning(ListNode** head, ListData v);
+//functii lista
 void addAtEnd(ListNode** head, ListData v);
-void print(ListNode *head);
-void push(StackNode** top, ListNode* v);
-ListNode* pop(StackNode** top);
+void listfree(ListNode* head);
+//functii stack
+void push(StackNode** top, StackData v);
+void fprintStack(FILE* fout, StackNode** top);
 void deleteStack(StackNode** top);

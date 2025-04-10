@@ -25,14 +25,14 @@ void eliberare_generatie(Data ***a, int n, int m) {
     free (*(a));
 }
 
-void eliberare_matrice(int ***a, int n, int m) {
+static void eliberare_matrice(int ***a, int n, int m) {
     for (int i = 0; i < n; i++) {
         free ((*(a))[i]);
     }
     free (*(a));
 }
 
-int calcul_vecini_vii(Data **gen, int ln, int cl, int n, int m) {
+static int calcul_vecini_vii(Data **gen, int ln, int cl, int n, int m) {
     int nr = 0;
     if (ln > 0 && cl > 0 && ln < n - 1 && cl < m - 1 ) { //celula centru 
         if (gen[ln][cl - 1] == CELULA_VIE) { //vecin stanga !
@@ -171,9 +171,11 @@ int calcul_vecini_vii(Data **gen, int ln, int cl, int n, int m) {
     return nr;
 }
 
-void gen_urmatoare(Data **gen, int n, int m) {
-    //Definire si alocare memore matrice nr_vecini_vii
+ListNode* gen_urmatoare(Data **gen, int n, int m) {
+    //Declarari
     int **vecini, i, j;
+    ListNode* head = NULL;
+    //Alocare memore matrice nr_vecini_vii
     if ((vecini = (int**)malloc(n*sizeof(int*))) == NULL) {
         printf("Eroare alocare memorie generatie linii");
         exit(1);
@@ -185,7 +187,7 @@ void gen_urmatoare(Data **gen, int n, int m) {
         }
     }
 
-    //
+    //Populare matrice vecini
     for (i = 0; i < n; i++) {
         for (j = 0; j < m; j++) {
             vecini[i][j] = calcul_vecini_vii(gen, i, j, n, m);
@@ -197,15 +199,20 @@ void gen_urmatoare(Data **gen, int n, int m) {
                 case CELULA_VIE:
                     if (vecini[i][j] < 2 || vecini[i][j] > 3) {
                         gen[i][j] = CELULA_MOARTA;
+                        ListData value = {i, j};
+                        addAtEnd(&head, value);
                     }
                     break;
                 default:
                     if (vecini[i][j] == 3) {
                         gen[i][j] = CELULA_VIE;
+                        ListData value = {i, j};
+                        addAtEnd(&head, value);
                     }
                     break;
             }
         }
     }
     eliberare_matrice(&vecini, n, m);
+    return head;
 }

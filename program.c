@@ -6,7 +6,7 @@ int main (int argc, const char* argv[]) {
     FILE *fin, *fout;
     int nr_fisier, nr_linii, nr_coloane, nr_generatii, i;
     char **generatie;
-    // StackNode* stackTop = NULL;
+    StackNode* stackTop = NULL;
 
     //verificare deschidere fisiere
     if ((fin = fopen(argv[1], "r")) == NULL) {
@@ -39,19 +39,27 @@ int main (int argc, const char* argv[]) {
 
     citire_matrice(fin, generatie, nr_linii, nr_coloane);
 
-    printare_matrice(fout, generatie, nr_linii, nr_coloane);
-
-    //Generare generatie urmatoare si printare
-    for (i = 0; i < nr_generatii; i++) {
-        gen_urmatoare(generatie, nr_linii, nr_coloane);
+    switch (nr_fisier)
+    {
+    case 1:
         printare_matrice(fout, generatie, nr_linii, nr_coloane);
-        // if (capLista != NULL) {
-        //     // printLista(fout, capLista);
-        //     // fprintf(fout,"\n");
-        //     // push(&stackTop, capLista);
-        // }
+        //Generare generatie urmatoare si printare
+        for (i = 0; i < nr_generatii; i++) {
+            listfree(gen_urmatoare(generatie, nr_linii, nr_coloane));
+            printare_matrice(fout, generatie, nr_linii, nr_coloane);
+        }
+        break;
+    
+    case 2:
+        for (i = 0; i < nr_generatii; i++) {
+            StackData genlist = {i+1, gen_urmatoare(generatie, nr_linii, nr_coloane)};
+            push(&stackTop, genlist);
+        }
+        fprintStack(fout, &stackTop);
+        break;
+    default: break;
     }
-
+    deleteStack(&stackTop);
     eliberare_generatie(&generatie, nr_linii, nr_coloane);
 
     return 0;

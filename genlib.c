@@ -171,7 +171,7 @@ static int calcul_vecini_vii(Data **gen, int ln, int cl, int n, int m) {
     return nr;
 }
 
-ListNode* gen_urmatoare(Data **gen, int n, int m) {
+ListNode* gen_urmatoare(Data **gen, int n, int m, int c) {
     //Declarari
     int **vecini, i, j;
     ListNode* head = NULL;
@@ -193,26 +193,91 @@ ListNode* gen_urmatoare(Data **gen, int n, int m) {
             vecini[i][j] = calcul_vecini_vii(gen, i, j, n, m);
         }
     }
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
-            switch (gen[i][j]) {
-                case CELULA_VIE:
-                    if (vecini[i][j] < 2 || vecini[i][j] > 3) {
-                        gen[i][j] = CELULA_MOARTA;
-                        ListData value = {i, j};
-                        addAtEnd(&head, value);
-                    }
-                    break;
-                default:
-                    if (vecini[i][j] == 3) {
-                        gen[i][j] = CELULA_VIE;
-                        ListData value = {i, j};
-                        addAtEnd(&head, value);
-                    }
-                    break;
+    if (c == 0) { //regula A
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < m; j++) {
+                switch (gen[i][j]) {
+                    case CELULA_VIE:
+                        if (vecini[i][j] < 2 || vecini[i][j] > 3) {
+                            gen[i][j] = CELULA_MOARTA;
+                            ListData value = {i, j};
+                            addAtEnd(&head, value);
+                        }
+                        break;
+                    default:
+                        if (vecini[i][j] == 3) {
+                            gen[i][j] = CELULA_VIE;
+                            ListData value = {i, j};
+                            addAtEnd(&head, value);
+                        }
+                        break;
+                }
+            }
+        }
+    } else if (c == 1) { //regula B
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < m; j++) {
+                if (vecini[i][j] == 2 && gen[i][j] == CELULA_MOARTA) {
+                    gen[i][j] = CELULA_VIE;
+                    ListData value = {i, j};
+                    addAtEnd(&head, value);
+                }
             }
         }
     }
     eliberare_matrice(&vecini, n, m);
     return head;
+}
+
+void geninit(Data*** generatie, int nr_linii, int nr_coloane) {
+    if ((*generatie = (char**)malloc(nr_linii*sizeof(char*))) == NULL) {
+        printf("Eroare alocare memorie generatie linii");
+        exit(1);
+    }
+    for (int i = 0; i < nr_linii; i++) {
+        if (((*generatie)[i] = (char*)malloc(nr_coloane*sizeof(char))) == NULL) {
+            printf("Eroare alocare memorie generatie coloane");
+            exit(1);
+        }
+    }
+}
+
+static void gencpy(char** gen1, Data** gen2, int n, int m) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            gen1[i][j] = gen2[i][j];
+        }
+    }
+}
+
+ListNode *create_initNode(Data **gen, int n, int m) {
+    ListNode *head = NULL;
+    for(int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if(gen[i][j] == CELULA_VIE) {
+                ListData value = {i, j};
+                addAtEnd(&head, value);
+            }
+        }
+    }
+    return head;
+}
+
+void printGenTree(FILE *f, Data **gen, int n, int m, BinaryNode *root, int k) {
+    if (k < 0) {
+        return;
+    }
+    printare_matrice(f, gen, n, m);
+    Data **copy;
+    geninit(&copy, n, m);
+    gencpy(copy, gen, n, m);
+    StackData listleft = {root->val.nr + 1, gen_urmatoare(copy, n, m, 1)};
+    StackData listright = {root->val.nr + 1, gen_urmatoare(gen, n, m, 0)};
+    initTree(&root->left, listleft);
+    initTree(&root->right, listright);
+    k--;
+    printGenTree(f, copy, n, m, root->left, k);
+    printGenTree(f, gen, n, m, root->right, k);
+    eliberare_generatie(&gen, n, m);
+    eliberare_generatie(&copy, n, m);
 }

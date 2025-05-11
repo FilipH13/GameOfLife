@@ -7,6 +7,7 @@ int main (int argc, const char* argv[]) {
     int nr_fisier, nr_linii, nr_coloane, nr_generatii, i;
     char **generatie;
     StackNode* stackTop = NULL;
+    BinaryNode* BinTree = NULL;
 
     //verificare deschidere fisiere
     if ((fin = fopen(argv[1], "r")) == NULL) {
@@ -22,20 +23,12 @@ int main (int argc, const char* argv[]) {
     
     //Citire date
     fscanf(fin, "%d", &nr_fisier);
-    fscanf(fin, "%d%d", &nr_linii, &nr_coloane);
+    fscanf(fin, "%d", &nr_linii);
+    fscanf(fin, "%d", &nr_coloane);
     fscanf(fin, "%d", &nr_generatii);
 
     //Alocare memorie pentru generatie
-    if ((generatie = (char**)malloc(nr_linii*sizeof(char*))) == NULL) {
-        printf("Eroare alocare memorie generatie linii");
-        exit(1);
-    }
-    for (i = 0; i < nr_linii; i++) {
-        if ((generatie[i] = (char*)malloc(nr_coloane*sizeof(char))) == NULL) {
-            printf("Eroare alocare memorie generatie coloane");
-            exit(1);
-        }
-    }
+    geninit(&generatie, nr_linii, nr_coloane);
 
     citire_matrice(fin, generatie, nr_linii, nr_coloane);
 
@@ -45,17 +38,23 @@ int main (int argc, const char* argv[]) {
         printare_matrice(fout, generatie, nr_linii, nr_coloane);
         //Generare generatie urmatoare si printare
         for (i = 0; i < nr_generatii; i++) {
-            listfree(gen_urmatoare(generatie, nr_linii, nr_coloane));
+            listfree(gen_urmatoare(generatie, nr_linii, nr_coloane, 0));
             printare_matrice(fout, generatie, nr_linii, nr_coloane);
         }
         break;
     
     case 2:
         for (i = 0; i < nr_generatii; i++) {
-            StackData genlist = {i+1, gen_urmatoare(generatie, nr_linii, nr_coloane)};
+            StackData genlist = {i+1, gen_urmatoare(generatie, nr_linii, nr_coloane, 0)};
             push(&stackTop, genlist);
         }
         fprintStack(fout, &stackTop);
+        break;
+    case 3:
+        StackData genbinlist = {0, create_initNode(generatie, nr_linii, nr_coloane)};
+        initTree(&BinTree, genbinlist);
+        printGenTree(fout, generatie, nr_linii, nr_coloane, BinTree, nr_generatii);
+        deleteTree(&BinTree);
         break;
     default: break;
     }

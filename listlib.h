@@ -29,6 +29,13 @@ struct StackList {
 
 typedef struct StackList StackNode;
 
+struct bt {
+    StackData val;
+    struct bt *left, *right;
+};
+
+typedef struct bt BinaryNode;
+
 //functii lista
 void addAtEnd(ListNode** head, ListData v);
 void listfree(ListNode* head);
@@ -36,3 +43,6 @@ void listfree(ListNode* head);
 void push(StackNode** top, StackData v);
 void fprintStack(FILE* fout, StackNode** top);
 void deleteStack(StackNode** top);
+//functii arbore
+void initTree(BinaryNode **root, StackData d);
+void deleteTree(BinaryNode **root);

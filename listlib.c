@@ -84,3 +84,24 @@ void deleteStack(StackNode** top) {
         free(temp);
     }
 }
+//functii binarytree
+void initTree(BinaryNode **root, StackData d) {
+    if ((*root = (BinaryNode*)malloc(sizeof(BinaryNode))) == NULL) {
+        printf("Eroare alocare memorie nod arbore");
+        exit(1);
+    };
+    (*root)->left = (*root)->right = NULL;
+    (*root)->val = d; 
+}
+void deleteTree(BinaryNode **root) {
+    if (*root == NULL) {
+        return;
+    }
+    BinaryNode *left, *right;
+    left = (*root)->left;
+    right = (*root)->right;
+    deleteTree(&left);
+    deleteTree(&right);
+    listfree((*root)->val.listhead);
+    free(*root);
+}

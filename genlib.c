@@ -263,11 +263,17 @@ ListNode *create_initNode(Data **gen, int n, int m) {
     return head;
 }
 
-void printGenTree(FILE *f, Data **gen, int n, int m, BinaryNode *root, int k) {
+void GenerationTree(FILE *f, Data **gen, int n, int m, BinaryNode *root, int k, int c) {
     if (k < 0) {
         return;
     }
-    printare_matrice(f, gen, n, m);
+    if (c == 0) {
+        printare_matrice(f, gen, n, m);
+    }
+    else if (c == 1) {
+        Graph *g = convert(gen, n, m);
+        getLHpath(f, g);
+    }
     Data **copy;
     geninit(&copy, n, m);
     gencpy(copy, gen, n, m);
@@ -276,8 +282,136 @@ void printGenTree(FILE *f, Data **gen, int n, int m, BinaryNode *root, int k) {
     initTree(&root->left, listleft);
     initTree(&root->right, listright);
     k--;
-    printGenTree(f, copy, n, m, root->left, k);
-    printGenTree(f, gen, n, m, root->right, k);
+    GenerationTree(f, copy, n, m, root->left, k, c);
+    GenerationTree(f, gen, n, m, root->right, k, c);
     eliberare_generatie(&gen, n, m);
     eliberare_generatie(&copy, n, m);
 }
+
+int nr_celule_vii (Data **gen, int n, int m) {
+    int k = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (gen[i][j] == CELULA_VIE) {
+                k++;
+            }
+        }
+    }
+    return k;
+}
+
+int existamuchie(int a, int b, Data **gen, int n, int m, GraphVerticesData v) {
+    int nr_ordine = -1;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (gen[i][j] == CELULA_VIE) {
+                nr_ordine++;
+                if (nr_ordine == a) {
+                    v.linie = i;
+                    v.coloana = j;
+                    v.nr_ord = nr_ordine;
+                } else if (nr_ordine == b) {
+                    int disti = ((i - v.linie) > 0) ? i - v.linie : v.linie - i;
+                    int distj = ((j - v.coloana) > 0) ? j - v.coloana : v.coloana - j;
+                    if (disti <= 1 && distj <= 1) {
+                        return 1;
+                    } else return 0;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+Graph *convert(Data **gen, int n, int m) {
+    int i,j;
+    Graph* g;
+    if ((g = (Graph*)malloc(sizeof(Graph))) == NULL) {
+        printf("Eroare alocare de memorie convert graph");
+        exit(1);
+    }
+    g->V = nr_celule_vii(gen, n, m);
+    if ((g->a = (int**)malloc((g->V)*sizeof(int*))) == NULL) {
+        printf("Eroare alocare de memorie convert matrix rows");
+        exit(1); 
+    }
+    for (i = 0; i < g->V; i++) {
+        if ((g->a[i] = (int*)calloc((g->V), sizeof(int))) == NULL) {
+            printf("Eroare alocare de memorie convert matrix cols");
+            exit(1); 
+        }
+    }
+    g->E = 0;
+    if ((g->vertices = (GraphVerticesData*)calloc((g->V), sizeof(GraphVerticesData))) == NULL) {
+        printf("Eroare alocare de memorie convert vertices");
+        exit(1);
+    }
+
+    for (i = 0; i < g->V; i++) {
+        for (j = 0; j < i; j++) {
+            g->a[i][j] = existamuchie(j, i, gen, n, m, g->vertices[j]); //pentru ca j < i
+            g->a[j][i] = g->a[i][j];
+            if (g->a[i][j] != 0){
+                g->E += 2;
+            }
+        }
+    }
+    for (i = 0; i < g->V; i++) {
+        for (j = 0; j < g->V; j++) {
+            if (g->a[i][j] != 0) {
+                g->vertices[i].grad++;
+            }
+        }
+    }
+    return g;
+}
+
+// void DFS_scan(FILE* f, Graph *g, int visited[], int i, int ord1) {
+//     int j;
+//     visited[i] = 1;
+//     if (g->vertices[i].grad == 1) {
+//         ord1++;
+//     }
+//     if (ord1 > 2) return -1;
+//     fprintf(f, "Node %d -> ", i);
+//     for (j = 0; j < g->V; j++) 
+//         if (g->a[i][j] == 1 && visited[j] == 0)
+//             DFS_scan(f, g, visited, j, ord1);
+// }
+
+void DFS_hamiltonian(FILE* f, Graph* g, int visited[], int path[], int pos, int current) {
+    visited[current] = 1;
+    path[pos] = current;
+
+    if (pos == g->V - 1) {
+        // Found a Hamiltonian path
+        fprintf(f, "Hamiltonian Path: ");
+        for (int i = 0; i < g->V; i++) {
+            fprintf(f, "%d ", path[i]);
+        }
+        fprintf(f, "\n");
+        //visited[current] = 0; // If you want *all* Hamiltonian paths
+        return;
+    }
+
+    for (int j = 0; j < g->V; j++) {
+        if (g->a[current][j] == 1 && visited[j] == 0) {
+            DFS_hamiltonian(f, g, visited, path, pos + 1, j);
+        }
+    }
+
+    visited[current] = 0; // backtrack
+}
+
+void getLHpath(FILE *f, Graph *g) {
+    int i;
+    int *visited = (int*)calloc(g->V,sizeof(int));
+    int* head = (int*)calloc(g->V, sizeof(int));
+    for (i = 0; i < g->V; i++) 
+        if (visited[i] == 0) {
+            int ord1 = 0;
+            //DFS_hamiltonian(f, g, visited, head, 0, i);
+        }
+    free(visited);
+}
+

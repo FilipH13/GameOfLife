@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct lc {
     int linie;
@@ -22,12 +23,12 @@ struct sd {
 
 typedef struct sd StackData;
 
-struct StackList {
+struct sl {
     StackData val;
-    struct StackList* next;
+    struct sl* next;
 };
 
-typedef struct StackList StackNode;
+typedef struct sl StackNode;
 
 struct bt {
     StackData val;
@@ -35,6 +36,21 @@ struct bt {
 };
 
 typedef struct bt BinaryNode;
+
+
+ typedef struct gld {
+    int nr_ord;
+    int linie;
+    int coloana;
+    int grad;
+ } GraphVerticesData;
+
+typedef struct gr {
+    int V; 
+    int E; 
+    int **a;
+    GraphVerticesData *vertices;
+ } Graph;
 
 //functii lista
 void addAtEnd(ListNode** head, ListData v);
@@ -46,3 +62,5 @@ void deleteStack(StackNode** top);
 //functii arbore
 void initTree(BinaryNode **root, StackData d);
 void deleteTree(BinaryNode **root);
+//
+int DFS(FILE* f, Graph *g);

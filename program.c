@@ -53,7 +53,13 @@ int main (int argc, const char* argv[]) {
     case 3:
         StackData genbinlist = {0, create_initNode(generatie, nr_linii, nr_coloane)};
         initTree(&BinTree, genbinlist);
-        printGenTree(fout, generatie, nr_linii, nr_coloane, BinTree, nr_generatii);
+        GenerationTree(fout, generatie, nr_linii, nr_coloane, BinTree, nr_generatii, 0);
+        deleteTree(&BinTree);
+        break;
+    case 4:
+        StackData genbinlist2 = {0, create_initNode(generatie, nr_linii, nr_coloane)};
+        initTree(&BinTree, genbinlist2);
+        GenerationTree(fout, generatie, nr_linii, nr_coloane, BinTree, nr_generatii, 1);
         deleteTree(&BinTree);
         break;
     default: break;

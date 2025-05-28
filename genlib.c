@@ -263,19 +263,7 @@ ListNode *create_initNode(Data **gen, int n, int m) {
     return head;
 }
 
-int nr_celule_vii (Data **gen, int n, int m) {
-    int k = 0;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            if (gen[i][j] == CELULA_VIE) {
-                k++;
-            }
-        }
-    }
-    return k;
-}
-
-int nr_same_label(int **labels, int n, int m, int k) {
+static int nr_same_label(int **labels, int n, int m, int k) {
     int cnt = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
@@ -287,7 +275,7 @@ int nr_same_label(int **labels, int n, int m, int k) {
     return cnt;
 }
 
-int existamuchie(GraphVerticesData v1, GraphVerticesData v2) {
+static int existamuchie(GraphVerticesData v1, GraphVerticesData v2) {
     
     int disti = ((v2.linie - v1.linie) > 0) ? v2.linie - v1.linie : v1.linie - v2.linie;
     int distj = ((v2.coloana - v1.coloana) > 0) ? v2.coloana - v1.coloana : v1.coloana - v2.coloana;
@@ -298,7 +286,7 @@ int existamuchie(GraphVerticesData v1, GraphVerticesData v2) {
 
 }
 
- Graph *build_graph(Data **gen, int n, int m, int** labels, int k) {
+static Graph *build_graph(Data **gen, int n, int m, int** labels, int k) {
     int i,j;
     Graph* g;
     if ((g = (Graph*)malloc(sizeof(Graph))) == NULL) {
@@ -347,7 +335,7 @@ int existamuchie(GraphVerticesData v1, GraphVerticesData v2) {
     return g;
 }
 
-int hamiltonian_bool(Graph *g, int curr, int *visited, int *path, int npath) {
+static int hamiltonian_bool(Graph *g, int curr, int *visited, int *path, int npath) {
     if (npath == g->V) {
         return 1;
     }
@@ -389,7 +377,7 @@ int hamiltonian_bool(Graph *g, int curr, int *visited, int *path, int npath) {
     return 0;
 }
 
-void print_path(FILE *f, Graph *g, int *path) {
+static void print_path(FILE *f, const Graph *g, const int *path) {
             fprintf(f, "%d\n", g->V - 1);
             for (int i = 0; i < g->V; i++) {
                 fprintf(f, "(%d ,%d) ", g->vertices[path[i]].linie, g->vertices[path[i]].coloana);
@@ -397,7 +385,7 @@ void print_path(FILE *f, Graph *g, int *path) {
             fprintf(f, "\n");
 }
 
-int* findHpath(Graph *g) {
+static int* findHpath(Graph *g) {
     int *visited, *path; 
     if ((visited = (int*)calloc(g->V, sizeof(int))) == NULL) {
         printf("Eroare alocare memorie findHpath visited");
@@ -425,7 +413,7 @@ int* findHpath(Graph *g) {
     return NULL;
 }
 
-void fill_label(Data **gen, int **labels, int n, int m, int i, int j, int l) {
+static void fill_label(Data **gen, int **labels, int n, int m, int i, int j, int l) {
     if (i < 0 || j < 0 || i >= n || j >= m) return;
     if (gen[i][j] == CELULA_MOARTA || labels[i][j] != 0) return;
     labels [i][j] = l;
@@ -438,7 +426,7 @@ void fill_label(Data **gen, int **labels, int n, int m, int i, int j, int l) {
     }
 }
 
-Graph **convert(Data **gen, int n, int m, int *num) {
+static Graph **convert(Data **gen, int n, int m, int *num) {
     int **labels; 
     if ((labels = (int**)calloc(n, sizeof(int*))) == NULL) {
         printf("Eroare alocare memorie labels linii");
@@ -478,7 +466,7 @@ Graph **convert(Data **gen, int n, int m, int *num) {
     return graphs;
 }
 
-int *sort_graphs(Graph **arr, int n) {
+static int *sort_graphs(Graph **arr, int n) {
     int *s;    
     if ((s = (int*)malloc(n*sizeof(int))) == NULL) {
         printf("Eroare alocare memorie sorted");
@@ -499,7 +487,16 @@ int *sort_graphs(Graph **arr, int n) {
     return s;
 }
 
-void hamilton(FILE *f, Data** gen, int n, int m) {
+static void free_graph(Graph *g) {
+    for (int i = 0; i < g->V; i++) {
+        free(g->a[i]);
+    }
+    free(g->a);
+    free(g->vertices);
+    free(g);
+}
+
+static void hamilton(FILE *f, Data** gen, int n, int m) {
     int galength;
     Graph **grapharray = convert(gen, n, m, &galength);
     int *sorted = sort_graphs(grapharray, galength);
@@ -510,9 +507,15 @@ void hamilton(FILE *f, Data** gen, int n, int m) {
         if (path != NULL) {
             print_path(f, grapharray[sorted[i]], path);
             ok = 0;
+            free(path);
             break;
         };
     }
+    for (int i = 0; i < galength; i++) {
+        free_graph(grapharray[i]);
+    }
+    free(grapharray);
+    free(sorted);
     if (ok) {
         fprintf(f, "-1\n");
     }

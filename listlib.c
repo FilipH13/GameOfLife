@@ -93,6 +93,7 @@ void initTree(BinaryNode **root, StackData d) {
     (*root)->left = (*root)->right = NULL;
     (*root)->val = d; 
 }
+
 void deleteTree(BinaryNode **root) {
     if (*root == NULL) {
         return;
